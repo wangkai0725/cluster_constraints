@@ -39,36 +39,4 @@ if __name__ == '__main__':
 			pool.apply_async(sys_order, args = (topic, d, i))
 		pool.close()
 		pool.join()
-	d = '3'
-	for i in xrange(2):
-		pool = multiprocessing.Pool(processes = 3)
-		topic_list = TOPICS.split(' ')
-		for topic in topic_list:
-			pool.apply_async(sys_order, args = (topic, d, i))
-		pool.close()
-		pool.join()
-	d = '4'
-	for i in xrange(2):
-		pool = multiprocessing.Pool(processes = 3)
-		topic_list = TOPICS.split(' ')
-		for topic in topic_list:
-			pool.apply_async(sys_order, args = (topic, d, i))
-		pool.close()
-		pool.join()
-	d = '5'
-	for i in xrange(2):
-		pool = multiprocessing.Pool(processes = 3)
-		topic_list = TOPICS.split(' ')
-		for topic in topic_list:
-			pool.apply_async(sys_order, args = (topic, d, i))
-		pool.close()
-		pool.join()
-	d = '10'
-	for i in xrange(2):
-		pool = multiprocessing.Pool(processes = 3)
-		topic_list = TOPICS.split(' ')
-		for topic in topic_list:
-			pool.apply_async(sys_order, args = (topic, d, i))
-		pool.close()
-		pool.join()
 	# sys_order('MB226', '2', '0')
