@@ -1,10 +1,13 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20180408
+# Created Time : 20180508
 # File Name: calculate_pd.py
-# Description: 计算当前话题下的p(q|d)，p（w|d）
-
+# Description:
+计算当前话题下的P(Q|D)，P(E|D)
+Q表示10个词的主题扩展
+E表示全部扩展词的主题扩展
+D表示推特
 """
 import sys
 import time
@@ -139,6 +142,9 @@ def write_data(output_path, tweet_list):
 
 
 def tweet_sort(tweet_list):
+	# 按天分组
+	# 按bm25值排序
+	# 相同的按时间先后排序
 	_tweet_list = []
 	tweet_list = sorted(tweet_list, key = lambda x: x.get_day())
 	for k, v in groupby(tweet_list, key = lambda x: x.get_day()):
@@ -149,6 +155,7 @@ def tweet_sort(tweet_list):
 
 
 def remove_none(tweet_list):
+	# 去掉0
 	_tweet_list = []
 	for tweet in tweet_list:
 		if tweet.get_tweet_sumpqd() > 0:
@@ -195,6 +202,7 @@ if __name__ == '__main__':
 	for f in files:
 		input_file_name = data_path + f
 		tweet_list += load_data(input_file_name, topic)
+
 	f1 = calculate_pd(tweet_list, all_expand, topic, k1, b, avgdl)
 	print len(tweet_list)
 	tweet_list = remove_none(tweet_list)

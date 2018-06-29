@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20170503
-
+# Created Time : 20170509
 # File Name: cluster.py
 # Description: 聚类
 """
@@ -31,6 +30,7 @@ a2 = 0.01
 a3 = 0.01
 
 def tweet_top(tweet_list):
+	# 取每天前100条推特
 	_tweet_list = []
 	tweet_list = sorted(tweet_list, key = lambda x: x.get_day())
 	for k, v in groupby(tweet_list, key = lambda x: x.get_day()):
@@ -56,6 +56,7 @@ def load_data(filename):
 
 
 def transformer_array_vsm(tweet_list):
+	# 向量空间模型下的词向文档矩阵
 	corpus = []
 	for tweet in tweet_list:
 		corpus.append(' '.join(tweet.get_word_list()))
@@ -63,14 +64,31 @@ def transformer_array_vsm(tweet_list):
 	transformer = tt()
 	tfidf = transformer.fit_transform(vectorizer.fit_transform(corpus))
 	array = tfidf.toarray()
-	word_list=vectorizer.get_feature_names()
+	word_list = vectorizer.get_feature_names()
 	return array, word_list
 
 
+def transformer_array_word2vec(tweet_list, word2vec):
+	# word2vec的词向文档矩阵
+	array_list = []
+	for tweet in tweet_list:
+		array = np.zeros((400, ))
+		lens = 0
+		for word in tweet.get_word_list():
+			try:
+				a = word2vec[word]
+				array += a
+				lens += 1
+			except:
+				pass
+		if lens != 0:
+			array /= float(lens)
+		array_list.append(array)
+	return np.array(array_list)
+
+
 def kmeans_cluster(data_array, d):
-	'''
-	这里本地修改了sklearn，将欧氏距离改为余弦相似度
-	'''
+	# 尝试kmeans聚类
 	_kmeans = KMeans(n_clusters = d).fit(data_array)
 	clu_res = _kmeans.labels_
 	centroids = _kmeans.cluster_centers_
@@ -80,6 +98,7 @@ def kmeans_cluster(data_array, d):
 
 
 def nmf_cluster(data_array, d):
+	# nmf聚类
 	_nmf = nmf.Nmf(data_array, a1, a2, d)
 	U, V = _nmf.nmf()
 	clu_res = _u_get_clu(U)
@@ -87,6 +106,7 @@ def nmf_cluster(data_array, d):
 
 
 def regular_nmf_cluster(data_array, d, tweet_list):
+	# 正则化nmf聚类
 	_nmf = nmf.Regular_nmf(data_array, a1, a2, a3, d, tweet_list)
 	U, V = _nmf.r_nmf()
 	clu_res = _u_get_clu(U)
@@ -109,6 +129,7 @@ def _u_get_clu(n_u):
 
 
 def set_cluster_res(tweet_list, clu_res):
+	# 聚类结果写入
 	if len(tweet_list) != len(clu_res):
 		return 1
 	for i in xrange(len(tweet_list)):
@@ -117,6 +138,7 @@ def set_cluster_res(tweet_list, clu_res):
 
 
 def get_cluster_list(tweet_list):
+	# 获得聚类结果列表
 	cluster_list = []
 	_tweet_list = sorted(tweet_list, key = lambda x: x.get_clu())
 	for clu_num, _group in groupby(_tweet_list, key = lambda x: x.get_clu()):
@@ -131,6 +153,7 @@ def get_cluster_list(tweet_list):
 
 
 def get_centroid_list(centroids, array_word_list):
+	# 获得聚类中心列表
 	centroid_list = []
 	centroid_weight_list = []
 	n, word_num = centroids.shape
@@ -151,6 +174,10 @@ def get_centroid_list(centroids, array_word_list):
 
 
 def calculate_pqc_pec_all(cluster_list, web_expand, topic):
+	# 计算P(Q|C) P(E|C)
+	# Q表示10个词的主题 E表示全部扩展词的主题
+	# C表示聚类类簇
+	# 这里计算的是全部文本表示一个类簇
 	for cluster in cluster_list:
 		pec = 0
 		pqc = 0
@@ -168,6 +195,10 @@ def calculate_pqc_pec_all(cluster_list, web_expand, topic):
 
 
 def calculate_pqc_pec_centroid(centroid_list, centroid_weight_list, web_expand, topic):
+	# 计算P(Q|C) P(E|C)
+	# Q表示10个词的主题 E表示全部扩展词的主题
+	# C表示聚类类簇
+	# 这里计算的是聚类中心表示一个类簇
 	for i in xrange(len(centroid_list)):
 		pec = 0
 		pqc = 0
@@ -188,6 +219,7 @@ def calculate_pqc_pec_centroid(centroid_list, centroid_weight_list, web_expand, 
 
 
 def set_pqc_pec_all(tweet_list, cluster_list):
+	# 写入计算结果
 	pec_dic = {}
 	pqc_dic = {}
 	for clu in cluster_list:
@@ -200,6 +232,7 @@ def set_pqc_pec_all(tweet_list, cluster_list):
 
 
 def set_pqc_pec_centroid(tweet_list, centroid_list):
+	# 写入计算结果
 	pec_dic = {}
 	pqc_dic = {}
 	for clu in centroid_list:
@@ -221,24 +254,6 @@ def wrtie_data(output_path, write_list):
 def load_model(modle_path):
 	model = gensim.models.word2vec.Word2Vec.load(modle_path)
 	return model
-
-
-def transformer_array_word2vec(tweet_list, word2vec):
-	array_list = []
-	for tweet in tweet_list:
-		array = np.zeros((400, ))
-		lens = 0
-		for word in tweet.get_word_list():
-			try:
-				a = word2vec[word]
-				array += a
-				lens += 1
-			except:
-				pass
-		if lens != 0:
-			array /= float(lens)
-		array_list.append(array)
-	return np.array(array_list)
 
 
 if __name__ == '__main__':
@@ -263,11 +278,33 @@ if __name__ == '__main__':
 	web_expand = load_dic(expand_path)
 	# 每天取前100tweet
 	tweet_list = tweet_top(tweet_list)
+	# 将数据转换成向量，采用向量空间模型
+	data_array, array_word_list = transformer_array_vsm(tweet_list)
 
-	# 用word2vec表示
+	# kmeans聚类
+	clu_res, centroids = kmeans_cluster(data_array, d)
+
+	# nmf聚类
+	# clu_res, centroids = nmf_cluster(data_array, d)
+
+	# 正则化nmf聚类
+	# clu_res, centroids = regular_nmf_cluster(data_array, d, tweet_list)
+
+	# 结果写入tweet_list
+	flag0 = set_cluster_res(tweet_list, clu_res)
+	cluster_list = get_cluster_list(tweet_list)
+	centroid_list, centroid_weight_list = get_centroid_list(centroids, array_word_list)
+
+	calculate_pqc_pec_all(cluster_list, web_expand, topic)
+	calculate_pqc_pec_centroid(centroid_list, centroid_weight_list, web_expand, topic)
+	flag1 = set_pqc_pec_all(tweet_list, cluster_list)
+	flag2 = set_pqc_pec_centroid(tweet_list, centroid_list)
+	flag3 = wrtie_data(output_tweet, tweet_list)
+
+	'''
+	# 这段代码是用word2vec表示
 	# word2vec_model = load_model(word2vec_path)
 	# data_array = transformer_array_word2vec(tweet_list, word2vec_model)
-
 
 	# # # kmeans聚类
 	# clu_res, centroids = kmeans_cluster(data_array, d)
@@ -287,27 +324,4 @@ if __name__ == '__main__':
 	# flag1 = set_pqc_pec_all(tweet_list, cluster_list)
 	# # flag2 = set_pqc_pec_centroid(tweet_list, centroid_list)
 	# flag3 = wrtie_data(output_tweet, tweet_list)
-
-
-
-	# 将数据转换成向量，采用向量空间模型
-	data_array, array_word_list = transformer_array_vsm(tweet_list)
-
-	# kmeans聚类
-	clu_res, centroids = kmeans_cluster(data_array, d)
-
-	# nmf聚类
-	# clu_res, centroids = nmf_cluster(data_array, d)
-	# 正则化nmf聚类
-	# clu_res, centroids = regular_nmf_cluster(data_array, d, tweet_list)
-
-	# 结果写入tweet_list
-	flag0 = set_cluster_res(tweet_list, clu_res)
-	cluster_list = get_cluster_list(tweet_list)
-	centroid_list, centroid_weight_list = get_centroid_list(centroids, array_word_list)
-
-	calculate_pqc_pec_all(cluster_list, web_expand, topic)
-	calculate_pqc_pec_centroid(centroid_list, centroid_weight_list, web_expand, topic)
-	flag1 = set_pqc_pec_all(tweet_list, cluster_list)
-	flag2 = set_pqc_pec_centroid(tweet_list, centroid_list)
-	flag3 = wrtie_data(output_tweet, tweet_list)
+	'''
