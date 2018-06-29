@@ -1,9 +1,8 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20170103
-
-# File Name: test single result
+# Created Time : 20180628
+# File Name: eval.py
 # Description: 这是TREC官方给的代码，改了下
 """
 

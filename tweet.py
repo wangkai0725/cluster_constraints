@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20170504
+# Created Time : 20180628
 # File Name: tweet.py
 # Description: tweet类
 """

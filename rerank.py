@@ -1,10 +1,9 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20180409
+# Created Time : 20180628
 # File Name: rerank.py
 # Description: 排序
-
 """
 import argparse
 import sys

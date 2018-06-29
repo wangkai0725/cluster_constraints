@@ -1,8 +1,8 @@
 # -*- coding:utf-8 -*-
 """
 # author: wktxzr
-# Created Time : 20180409
-# File Name: nmf_main.py
+# Created Time : 20180628
+# File Name: rerank_main.py
 # Description: 
 """
 
